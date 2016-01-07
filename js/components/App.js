@@ -1,14 +1,13 @@
 import React from 'react';
 import Relay from 'react-relay';
-import VisitorCountWidget from './VisitorCountWidget';
-import PostCountWidget from './PostCountWidget';
+import Widget from './Widget';
 
 class App extends React.Component {
   render() {
     return (
       <div>
-        <VisitorCountWidget visitorCount="10" />
-        <PostCountWidget postCount="123" />
+        <Widget widget="VISITOR_COUNT" visitorCount="10" />
+        <Widget widget="POST_COUNT" postCount="123" />
       </div>
     );
   }
