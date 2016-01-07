@@ -3,24 +3,16 @@ import Relay from 'react-relay';
 import Widget from './Widget';
 
 class App extends React.Component {
-  renderWidgets = (widgets) => {
-    return widgets.map((widget, index) => {
-      return <Widget key={index} {...widget} />
+  renderWidgets = () => {
+    return this.props.viewer.widgets.edges.map(({cursor, node}) => {
+      return <Widget key={cursor} widget={node} />;
     });
   };
 
   render() {
-    const widgets = [{
-      widget: 'VISITOR_COUNT',
-      visitorCount: 10
-    }, {
-      widget: 'POST_COUNT',
-      postCount: 123
-    }];
-
     return (
       <div>
-        {this.renderWidgets(widgets)}
+        {this.renderWidgets()}
       </div>
     );
   }
@@ -32,7 +24,9 @@ export default Relay.createContainer(App, {
       fragment on User {
         widgets(first: 10) {
           edges {
+            cursor,
             node {
+              __typename,
               ${Widget.getFragment('widget')}
             }
           }

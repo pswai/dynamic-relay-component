@@ -4,17 +4,17 @@ import VisitorCountWidget from './VisitorCountWidget';
 import PostCountWidget from './PostCountWidget';
 
 const widgets = new Map([
-  ['VISITOR_COUNT', VisitorCountWidget],
-  ['POST_COUNT', PostCountWidget]
+  ['VisitorCountWidget', VisitorCountWidget],
+  ['PostCountWidget', PostCountWidget]
 ]);
 
 class Widget extends React.Component {
   render() {
     const {widget, ...others} = this.props;
-    const Component = widgets.get(widget);
+    const Component = widgets.get(widget.__typename);
 
     // We need to pass the rest props down to `Component'
-    return Component ? <Component {...others} /> : <div>Unknown widget</div>;
+    return Component ? <Component {...others} widget={widget} /> : <div>Unknown widget</div>;
   }
 }
 
@@ -22,8 +22,9 @@ export default Relay.createContainer(Widget, {
   fragments: {
     widget: () => Relay.QL`
       fragment on Widget {
-        id,
-        name
+        __typename,
+        ${VisitorCountWidget.getFragment('widget')}
+        ${PostCountWidget.getFragment('widget')}
       }
     `
   }
