@@ -17,6 +17,7 @@ import {
   GraphQLObjectType,
   GraphQLSchema,
   GraphQLString,
+  GraphQLUnionType
 } from 'graphql';
 
 import {
@@ -26,17 +27,19 @@ import {
   fromGlobalId,
   globalIdField,
   mutationWithClientMutationId,
-  nodeDefinitions,
+  nodeDefinitions
 } from 'graphql-relay';
 
 import {
   // Import methods that your schema can use to interact with your database
   User,
   Widget,
+  VisitorCountWidget,
+  PostCountWidget,
   getUser,
   getViewer,
   getWidget,
-  getWidgets,
+  getWidgets
 } from './database';
 
 /**
@@ -50,7 +53,7 @@ var {nodeInterface, nodeField} = nodeDefinitions(
     var {type, id} = fromGlobalId(globalId);
     if (type === 'User') {
       return getUser(id);
-    } else if (type === 'Widget') {
+    } else if (['Widget', 'VisitorCountWidget', 'PostCountWidget'].includes(type)) {
       return getWidget(id);
     } else {
       return null;
@@ -58,9 +61,13 @@ var {nodeInterface, nodeField} = nodeDefinitions(
   },
   (obj) => {
     if (obj instanceof User) {
-      return userType;
+      return UserType;
     } else if (obj instanceof Widget)  {
-      return widgetType;
+      return WidgetType;
+    } else if (obj instanceof VisitorCountWidget)  {
+      return VisitorCountWidgetType;
+    } else if (obj instanceof PostCountWidget)  {
+      return PostCountWidgetType;
     } else {
       return null;
     }
@@ -71,7 +78,7 @@ var {nodeInterface, nodeField} = nodeDefinitions(
  * Define your own types here
  */
 
-var userType = new GraphQLObjectType({
+var UserType = new GraphQLObjectType({
   name: 'User',
   description: 'A person who uses our app',
   fields: () => ({
@@ -80,30 +87,58 @@ var userType = new GraphQLObjectType({
       type: widgetConnection,
       description: 'A person\'s collection of widgets',
       args: connectionArgs,
-      resolve: (_, args) => connectionFromArray(getWidgets(), args),
-    },
+      resolve: (_, args) => connectionFromArray(getWidgets(), args)
+    }
   }),
-  interfaces: [nodeInterface],
+  interfaces: [nodeInterface]
 });
 
-var widgetType = new GraphQLObjectType({
+var VisitorCountWidgetType = new GraphQLObjectType({
+  name: 'VisitorCountWidget',
+  description: 'Widget to display visitor count',
+  fields: () => ({
+    id: globalIdField('VisitorCountWidget'),
+    visitorCount: {
+      type: GraphQLInt,
+      resolve: () => 10
+    }
+  }),
+  interfaces: [nodeInterface]
+});
+
+var PostCountWidgetType = new GraphQLObjectType({
+  name: 'PostCountWidget',
+  description: 'Widget to display post count',
+  fields: () => ({
+    id: globalIdField('PostCountWidgetType'),
+    postCount: {
+      type: GraphQLInt,
+      resolve: () => 123
+    }
+  }),
+  interfaces: [nodeInterface]
+});
+
+var WidgetType = new GraphQLUnionType({
   name: 'Widget',
   description: 'A shiny widget',
-  fields: () => ({
-    id: globalIdField('Widget'),
-    name: {
-      type: GraphQLString,
-      description: 'The name of the widget',
-    },
-  }),
-  interfaces: [nodeInterface],
+  types: [VisitorCountWidgetType, PostCountWidgetType],
+  resolveType: value => {
+    if (value instanceof VisitorCountWidget) {
+      return VisitorCountWidgetType;
+    } else if (value instanceof PostCountWidget) {
+      return PostCountWidgetType;
+    } else {
+      return null;
+    }
+  }
 });
 
 /**
  * Define your own connection types here
  */
 var {connectionType: widgetConnection} =
-  connectionDefinitions({name: 'Widget', nodeType: widgetType});
+  connectionDefinitions({name: 'Widget', nodeType: WidgetType});
 
 /**
  * This is the type that will be the root of our query,
@@ -115,8 +150,8 @@ var queryType = new GraphQLObjectType({
     node: nodeField,
     // Add your own root fields here
     viewer: {
-      type: userType,
-      resolve: () => getViewer(),
+      type: UserType,
+      resolve: () => getViewer()
     },
   }),
 });

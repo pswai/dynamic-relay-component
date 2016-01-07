@@ -10,17 +10,23 @@
 // Model types
 class User extends Object {}
 class Widget extends Object {}
+class VisitorCountWidget extends Widget {}
+class PostCountWidget extends Widget {}
 
 // Mock data
 var viewer = new User();
 viewer.id = '1';
 viewer.name = 'Anonymous';
-var widgets = ['What\'s-it', 'Who\'s-it', 'How\'s-it'].map((name, i) => {
-  var widget = new Widget();
-  widget.name = name;
-  widget.id = `${i}`;
-  return widget;
-});
+
+let visitorCountWidget = new VisitorCountWidget();
+visitorCountWidget.id = 'v1';
+visitorCountWidget.visitorCount = 10;
+
+let postCountWidget = new PostCountWidget();
+postCountWidget.id = 'p1';
+postCountWidget.postCount = 123;
+
+let widgets = [visitorCountWidget, postCountWidget];
 
 module.exports = {
   // Export methods that your schema can use to interact with your database
@@ -30,4 +36,6 @@ module.exports = {
   getWidgets: () => widgets,
   User,
   Widget,
+  VisitorCountWidget,
+  PostCountWidget
 };
