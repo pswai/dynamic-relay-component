@@ -1,4 +1,5 @@
 import React from 'react';
+import Relay from 'react-relay';
 import VisitorCountWidget from './VisitorCountWidget';
 import PostCountWidget from './PostCountWidget';
 
@@ -17,4 +18,13 @@ class Widget extends React.Component {
   }
 }
 
-export default Widget;
+export default Relay.createContainer(Widget, {
+  fragments: {
+    widget: () => Relay.QL`
+      fragment on Widget {
+        id,
+        name
+      }
+    `
+  }
+});

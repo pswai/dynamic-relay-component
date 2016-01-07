@@ -33,12 +33,11 @@ export default Relay.createContainer(App, {
         widgets(first: 10) {
           edges {
             node {
-              id,
-              name,
-            },
-          },
-        },
+              ${Widget.getFragment('widget')}
+            }
+          }
+        }
       }
-    `,
-  },
+    `
+  }
 });
