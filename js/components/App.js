@@ -3,11 +3,24 @@ import Relay from 'react-relay';
 import Widget from './Widget';
 
 class App extends React.Component {
+  renderWidgets = (widgets) => {
+    return widgets.map((widget, index) => {
+      return <Widget key={index} {...widget} />
+    });
+  };
+
   render() {
+    const widgets = [{
+      widget: 'VISITOR_COUNT',
+      visitorCount: 10
+    }, {
+      widget: 'POST_COUNT',
+      postCount: 123
+    }];
+
     return (
       <div>
-        <Widget widget="VISITOR_COUNT" visitorCount="10" />
-        <Widget widget="POST_COUNT" postCount="123" />
+        {this.renderWidgets(widgets)}
       </div>
     );
   }
